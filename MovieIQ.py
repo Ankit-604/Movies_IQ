@@ -14,7 +14,11 @@ st.set_page_config(page_title="🎬 MovieIQ Dashboard", layout="wide")
 
 # --- Global Professional Visualization Styling ---
 # Ensures all generated matplotlib/seaborn charts match the clean light corporate theme
-plt.style.use('seaborn-v0_8-whitegrid' if 'seaborn-v0_8-whitegrid' in plt.style.available() else 'default')
+if 'seaborn-v0_8-whitegrid' in plt.style.available:
+    plt.style.use('seaborn-v0_8-whitegrid')
+else:
+    plt.style.use('default')
+
 plt.rcParams.update({
     'figure.facecolor': '#F8FAFC',   # Matches application background
     'axes.facecolor': '#FFFFFF',     # Clean white plot backgrounds
