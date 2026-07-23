@@ -81,12 +81,13 @@ if uploaded_file:
     # --- Apply Filters ---
     filtered_df = df[(df["main_genre"].isin(selected_genres)) & (df["vote_average"] >= min_votes)]
 
-    # --- Layout Grid Split for Overview ---
+# --- Layout Grid Split for Overview ---
     col_left, col_right = st.columns(2)
     
     with col_left:
         st.subheader("🎯 Active Dataset Sample")
-        st.dataframe(filtered_df.grid_head(10), use_container_width=True)
+        # Fixed line: changed grid_head(10) to head(10)
+        st.dataframe(filtered_df.head(10), use_container_width=True)
 
     with col_right:
         st.subheader("📊 Numerical Feature Distribution")
