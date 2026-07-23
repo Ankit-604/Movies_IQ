@@ -1,6 +1,6 @@
 [theme]
-primaryColor = "#002C76"
-backgroundColor = "#F4F5F6"
-secondaryBackgroundColor = "#E5E7EB"
-textColor = "#1F2937"
-font = "sans serif"
+primaryColor = "#0A2540"         # Premium deep navy for primary buttons, sliders, and highlights
+backgroundColor = "#F8FAFC"      # Clean slate white/light gray background (easier on the eyes)
+secondaryBackgroundColor = "#FFFFFF" # Crisp white for the sidebar and form cards to create depth
+textColor = "#1E293B"            # Slate charcoal for highly legible typography
+font = "sans serif"              # Clean, modern sans-serif geometric font stack
