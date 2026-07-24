@@ -138,25 +138,58 @@ elif nav_page == "Data Exploration & ML Engine":
 
         st.markdown("---")
 
-        # --- Visualizations ---
-        st.subheader("📈 Exploratory Visual Analytics")
-        c_left, c_right = st.columns(2)
-        
-        with c_left:
-            st.markdown("**Capital Investment vs. Absolute Gross Returns**")
-            fig1, ax1 = plt.subplots(figsize=(6, 4))
-            sns.scatterplot(data=filtered_df, x="budget", y="revenue", hue="success", palette=PALETTE_MUTED, alpha=0.7, ax=ax1)
-            ax1.set_xlabel("Production Budget ($)")
-            ax1.set_ylabel("Gross Revenue ($)")
-            st.pyplot(fig1)
+        # --- Charts Section (Stage 2: Exploratory Data Analysis) ---
+    st.subheader("📈 Exploratory Visual Analytics (Stage 2)")
+    
+    # ROW 1: Questions 1 & 2
+    row1_col1, row1_col2 = st.columns(2)
 
-        with c_right:
-            st.markdown("**Core Dimension Distribution Over Success Outcomes**")
-            avg_metrics = filtered_df.groupby("success")[["popularity", "runtime", "vote_average"]].mean().reset_index()
-            avg_metrics = pd.melt(avg_metrics, id_vars="success", var_name="Metric", value_name="Average Value")
-            fig2, ax2 = plt.subplots(figsize=(6, 4))
-            sns.barplot(data=avg_metrics, x="Metric", y="Average Value", hue="success", palette=PALETTE_MUTED, ax=ax2)
-            st.pyplot(fig2)
+    with row1_col1:
+        st.markdown("**1. Capital Investment vs. Absolute Gross Returns**")
+        fig1, ax1 = plt.subplots(figsize=(6, 4))
+        sns.scatterplot(data=filtered_df, x="budget", y="revenue", hue="success", palette=PALETTE_MUTED, alpha=0.7, ax=ax1)
+        ax1.set_xlabel("Production Budget ($)")
+        ax1.set_ylabel("Gross Revenue ($)")
+        st.pyplot(fig1)
+
+    with row1_col2:
+        st.markdown("**2. Genre Distribution & Commercial Success Rates**")
+        # Calculating volume counts and profitability averages per genre segment
+        genre_stats = filtered_df.groupby("main_genre").agg(
+            total_movies=("success", "count"),
+            success_rate=("success", "mean")
+        ).reset_index().sort_values(by="total_movies", ascending=False)
+
+        fig2, ax2 = plt.subplots(figsize=(6, 4))
+        sns.barplot(data=genre_stats.head(10), x="total_movies", y="main_genre", hue="success_rate", palette="Viridis", ax=ax2)
+        ax2.set_xlabel("Volume of Movies Produced")
+        ax2.set_ylabel("Primary Genre Segment")
+        st.pyplot(fig2)
+
+    st.markdown("---")
+
+    # ROW 2: Questions 3 & 4
+    row2_col1, row2_col2 = st.columns(2)
+
+    with row2_col1:
+        st.markdown("**3. Operational Feature Attributes Across Outcome Classes**")
+        # Melting specific features to evaluate their direct association spreads clearly
+        avg_metrics = filtered_df.groupby("success")[["popularity", "vote_average"]].mean().reset_index()
+        avg_metrics = pd.melt(avg_metrics, id_vars="success", var_name="Metric", value_name="Average Value")
+        
+        fig3, ax3 = plt.subplots(figsize=(6, 4))
+        sns.barplot(data=avg_metrics, x="Metric", y="Average Value", hue="success", palette=PALETTE_MUTED, ax=ax3)
+        ax3.set_ylabel("Group Average Score")
+        st.pyplot(fig3)
+
+    with row2_col2:
+        st.markdown("**4. Feature Multi-Correlation Matrix Heatmap**")
+        # Generating a clean correlation grid of numeric fields
+        corr_matrix = filtered_df[['budget', 'revenue', 'popularity', 'runtime', 'vote_average']].corr()
+        
+        fig4, ax4 = plt.subplots(figsize=(6, 4))
+        sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap="Blues", cbar=True, square=True, ax=ax4)
+        st.pyplot(fig4)
 
         st.markdown("---")
 
