@@ -152,15 +152,22 @@ elif nav_page == "Data Exploration & ML Engine":
             st.pyplot(fig1)
 
         with row1_col2:
-            st.markdown("**2. Genre Trends: Prevalence and Success Profiles**")
+            st.markdown("**2. Genre Distribution & Commercial Success Rates**")
             # Calculate total volumes and success rates per genre block
             genre_stats = filtered_df.groupby("main_genre").agg(
                 total_movies=("success", "count"),
                 success_rate=("success", "mean")
             ).reset_index().sort_values(by="total_movies", ascending=False)
 
+            # Fix: We map color to the genre name itself, or drop hue to keep it simple and clean
             fig2, ax2 = plt.subplots(figsize=(6, 4))
-            sns.barplot(data=genre_stats.head(10), x="total_movies", y="main_genre", hue="success_rate", palette="Viridis", ax=ax2)
+            sns.barplot(
+                data=genre_stats.head(10), 
+                x="total_movies", 
+                y="main_genre", 
+                palette="viridis",  # Capital 'V' to lowercase 'viridis' works best here
+                ax=ax2
+            )
             ax2.set_xlabel("Volume of Movies Produced")
             ax2.set_ylabel("Primary Genre Segment")
             st.pyplot(fig2)
