@@ -137,14 +137,15 @@ elif nav_page == "Data Exploration & ML Engine":
 
         st.markdown("---")
 
-        # --- Visualizations (Stage 2: Exploratory Data Analysis) ---
+# --- Visualizations (Stage 2: Exploratory Data Analysis) ---
         st.subheader("📈 Exploratory Visual Analytics")
         
         # ROW 1: Questions 1 & 2
         row1_col1, row1_col2 = st.columns(2)
         
         with row1_col1:
-            st.markdown("**1. Capital Investment vs. Absolute Gross Returns**")
+            # Exact title from PDF Stage 2, Question 1
+            st.markdown("**1. Budget vs. Revenue**")
             fig1, ax1 = plt.subplots(figsize=(6, 4))
             sns.scatterplot(data=filtered_df, x="budget", y="revenue", hue="success", palette=PALETTE_MUTED, alpha=0.7, ax=ax1)
             ax1.set_xlabel("Production Budget ($)")
@@ -152,22 +153,15 @@ elif nav_page == "Data Exploration & ML Engine":
             st.pyplot(fig1)
 
         with row1_col2:
-            st.markdown("**2. Genre Distribution & Commercial Success Rates**")
-            # Calculate total volumes and success rates per genre block
+            # Exact title context from PDF Stage 2, Question 2
+            st.markdown("**2. Explore genre trends**")
             genre_stats = filtered_df.groupby("main_genre").agg(
                 total_movies=("success", "count"),
                 success_rate=("success", "mean")
             ).reset_index().sort_values(by="total_movies", ascending=False)
 
-            # Fix: We map color to the genre name itself, or drop hue to keep it simple and clean
             fig2, ax2 = plt.subplots(figsize=(6, 4))
-            sns.barplot(
-                data=genre_stats.head(10), 
-                x="total_movies", 
-                y="main_genre", 
-                palette="viridis",  # Capital 'V' to lowercase 'viridis' works best here
-                ax=ax2
-            )
+            sns.barplot(data=genre_stats.head(10), x="total_movies", y="main_genre", palette="viridis", ax=ax2)
             ax2.set_xlabel("Volume of Movies Produced")
             ax2.set_ylabel("Primary Genre Segment")
             st.pyplot(fig2)
@@ -178,8 +172,8 @@ elif nav_page == "Data Exploration & ML Engine":
         row2_col1, row2_col2 = st.columns(2)
 
         with row2_col1:
-            st.markdown("**3. Core Metric Variance Shifts Across Outcome Classes**")
-            # Isolate and melt numeric parameters to gauge variation profiles cleanly
+            # Exact title context from PDF Stage 2, Question 3
+            st.markdown("**3. Examine how popularity, runtime, and vote_average relate to success**")
             avg_metrics = filtered_df.groupby("success")[["popularity", "vote_average"]].mean().reset_index()
             avg_metrics = pd.melt(avg_metrics, id_vars="success", var_name="Metric", value_name="Average Value")
             
@@ -189,7 +183,8 @@ elif nav_page == "Data Exploration & ML Engine":
             st.pyplot(fig3)
 
         with row2_col2:
-            st.markdown("**4. Numeric Feature Structural Correlation Map**")
+            # Exact title from PDF Stage 2, Question 4
+            st.markdown("**4. Correlation heatmap of the numeric features**")
             corr_matrix = filtered_df[['budget', 'revenue', 'popularity', 'runtime', 'vote_average']].corr()
             
             fig4, ax4 = plt.subplots(figsize=(6, 4))
