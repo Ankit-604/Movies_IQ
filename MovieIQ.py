@@ -46,7 +46,6 @@ nav_page = st.sidebar.radio(
 )
 
 # --- Common File Upload Component ---
-# Placed globally so data can flow across tabs if available
 uploaded_file = st.sidebar.file_uploader("Upload corporate movie asset ledger (CSV Format)", type=["csv"])
 
 # Pre-parse function for shared use
@@ -77,19 +76,19 @@ if nav_page == "Problem Statement":
     st.markdown("""
     ### 1. Defining Film Success
     For the purposes of this project, a motion picture asset is algorithmically labeled as a **Success (1)** if its gross global box office output strictly eclipses its absolute production capital overhead requirements. 
-    Conversely, any asset where expenses match or dwarf returns is tracked as a **Failure/Loss (0)**[cite: 5]:
+    Conversely, any asset where expenses match or dwarf returns is tracked as a **Failure/Loss (0)**:
     """)
     st.latex(r"\text{Success} = \begin{cases} 1 & \text{if } \text{Revenue} > \text{Budget} \\ 0 & \text{otherwise} \end{cases}")
     
     st.markdown("""
     ### 2. Value Proposition & Key Stakeholders
-    Predicting a film's financial viability before manufacturing is uniquely valuable to minimize high-stakes media deployment risk[cite: 5]:
-    * **Film Studios/Production Houses:** Enables operational greenlighting workflows to filter out high-cost, low-yield concepts before spending millions on asset production[cite: 5].
-    * **Institutional Investors & Financiers:** Provides an objective, data-backed screening check to evaluate if capital allocations match historical risk-reward baselines[cite: 5].
+    Predicting a film's financial viability before manufacturing is uniquely valuable to minimize high-stakes media deployment risk:
+    * **Film Studios/Production Houses:** Enables operational greenlighting workflows to filter out high-cost, low-yield concepts before spending millions on asset production.
+    * **Institutional Investors & Financiers:** Provides an objective, data-backed screening check to evaluate if capital allocations match historical risk-reward baselines.
     
     ### 3. Problem Context: Supervised Classification
-    This project frames film viability as a **binary classification problem** because the target outcome variable is discrete and categorical rather than a continuous metric[cite: 5]. 
-    Our target model variable is `success` ($1$ or $0$), maps back to predictable early-stage project indicators, and explicitly excludes late-stage variables like continuous revenue to guard against data leaks[cite: 5].
+    This project frames film viability as a **binary classification problem** because the target outcome variable is discrete and categorical rather than a continuous metric. 
+    Our target model variable is `success` ($1$ or $0$), maps back to predictable early-stage project indicators, and explicitly excludes late-stage variables like continuous revenue to guard against data leaks.
     """)
 
 # ==========================================
@@ -99,12 +98,12 @@ elif nav_page == "Project Objectives":
     st.subheader("🎯 Project Core Objectives")
     
     st.markdown("""
-    The primary goal of the MovieIQ initiative is to construct an end-to-end interactive intelligence suite capable of analyzing historical film performance data and deploying a trained machine learning classifier to accurately infer profitability vectors[cite: 5].
+    The primary goal of the MovieIQ initiative is to construct an end-to-end interactive intelligence suite capable of analyzing historical film performance data and deploying a trained machine learning classifier to accurately infer profitability vectors.
     
-    To achieve this objective, the engine executes three concrete steps[cite: 5]:
-    1. **Data Ingestion & Hygiene:** Parse embedded text formats, drop zero-entry anomalies, establish clean class metrics, and isolate feature indices[cite: 5].
-    2. **Statistical Control & Visualization:** Conduct independent variable testing (T-tests, Chi-square cross-tabulations) to mathematical confirm real operational trends versus random sample luck[cite: 5].
-    3. **Machine Learning Pipeline Optimization:** Train a balanced Random Forest Classifier on historical parameters, assess predictive errors via confusion matrix configurations, and deploy it as a live responsive customer simulator[cite: 5].
+    To achieve this objective, the engine executes three concrete steps:
+    1. **Data Ingestion & Hygiene:** Parse embedded text formats, drop zero-entry anomalies, establish clean class metrics, and isolate feature indices.
+    2. **Statistical Control & Visualization:** Conduct independent variable testing (T-tests, Chi-square cross-tabulations) to mathematical confirm real operational trends versus random sample luck.
+    3. **Machine Learning Pipeline Optimization:** Train a balanced Random Forest Classifier on historical parameters, assess predictive errors via confusion matrix configurations, and deploy it as a live responsive customer simulator.
     """)
 
 # ==========================================
@@ -138,25 +137,57 @@ elif nav_page == "Data Exploration & ML Engine":
 
         st.markdown("---")
 
-        # --- Visualizations ---
+        # --- Visualizations (Stage 2: Exploratory Data Analysis) ---
         st.subheader("📈 Exploratory Visual Analytics")
-        c_left, c_right = st.columns(2)
         
-        with c_left:
-            st.markdown("**Capital Investment vs. Absolute Gross Returns**")
+        # ROW 1: Questions 1 & 2
+        row1_col1, row1_col2 = st.columns(2)
+        
+        with row1_col1:
+            st.markdown("**1. Capital Investment vs. Absolute Gross Returns**")
             fig1, ax1 = plt.subplots(figsize=(6, 4))
             sns.scatterplot(data=filtered_df, x="budget", y="revenue", hue="success", palette=PALETTE_MUTED, alpha=0.7, ax=ax1)
             ax1.set_xlabel("Production Budget ($)")
             ax1.set_ylabel("Gross Revenue ($)")
             st.pyplot(fig1)
 
-        with c_right:
-            st.markdown("**Core Dimension Distribution Over Success Outcomes**")
-            avg_metrics = filtered_df.groupby("success")[["popularity", "runtime", "vote_average"]].mean().reset_index()
-            avg_metrics = pd.melt(avg_metrics, id_vars="success", var_name="Metric", value_name="Average Value")
+        with row1_col2:
+            st.markdown("**2. Genre Trends: Prevalence and Success Profiles**")
+            # Calculate total volumes and success rates per genre block
+            genre_stats = filtered_df.groupby("main_genre").agg(
+                total_movies=("success", "count"),
+                success_rate=("success", "mean")
+            ).reset_index().sort_values(by="total_movies", ascending=False)
+
             fig2, ax2 = plt.subplots(figsize=(6, 4))
-            sns.barplot(data=avg_metrics, x="Metric", y="Average Value", hue="success", palette=PALETTE_MUTED, ax=ax2)
+            sns.barplot(data=genre_stats.head(10), x="total_movies", y="main_genre", hue="success_rate", palette="Viridis", ax=ax2)
+            ax2.set_xlabel("Volume of Movies Produced")
+            ax2.set_ylabel("Primary Genre Segment")
             st.pyplot(fig2)
+
+        st.markdown("---")
+        
+        # ROW 2: Questions 3 & 4
+        row2_col1, row2_col2 = st.columns(2)
+
+        with row2_col1:
+            st.markdown("**3. Core Metric Variance Shifts Across Outcome Classes**")
+            # Isolate and melt numeric parameters to gauge variation profiles cleanly
+            avg_metrics = filtered_df.groupby("success")[["popularity", "vote_average"]].mean().reset_index()
+            avg_metrics = pd.melt(avg_metrics, id_vars="success", var_name="Metric", value_name="Average Value")
+            
+            fig3, ax3 = plt.subplots(figsize=(6, 4))
+            sns.barplot(data=avg_metrics, x="Metric", y="Average Value", hue="success", palette=PALETTE_MUTED, ax=ax3)
+            ax3.set_ylabel("Group Average Score")
+            st.pyplot(fig3)
+
+        with row2_col2:
+            st.markdown("**4. Numeric Feature Structural Correlation Map**")
+            corr_matrix = filtered_df[['budget', 'revenue', 'popularity', 'runtime', 'vote_average']].corr()
+            
+            fig4, ax4 = plt.subplots(figsize=(6, 4))
+            sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap="Blues", cbar=True, square=True, ax=ax4)
+            st.pyplot(fig4)
 
         st.markdown("---")
 
@@ -195,11 +226,11 @@ elif nav_page == "Data Exploration & ML Engine":
             with ml_r:
                 st.markdown("**Error Bound Matrix Mapping**")
                 conf = confusion_matrix(y_test, y_pred)
-                fig3, ax3 = plt.subplots(figsize=(5, 3.5))
-                sns.heatmap(conf, annot=True, fmt='d', cmap="Blues", cbar=False, ax=ax3)
-                ax3.set_xlabel("Predicted Label Target")
-                ax3.set_ylabel("Ground Truth Target")
-                st.pyplot(fig3)
+                fig5, ax5 = plt.subplots(figsize=(5, 3.5))
+                sns.heatmap(conf, annot=True, fmt='d', cmap="Blues", cbar=False, ax=ax5)
+                ax5.set_xlabel("Predicted Label Target")
+                ax5.set_ylabel("Ground Truth Target")
+                st.pyplot(fig5)
         else:
             st.warning("Data threshold insufficient to split and optimize random forest structures safely.")
 
@@ -249,6 +280,6 @@ elif nav_page == "Strategic Recommendations & Reflection":
     **Studio Viability Query:** *"Will our next film succeed?"*
     
     If asked by studio leads, our reliance on the **MovieIQ** engine would be **cautiously confident**. While the system achieves robust technical accuracy scores, users must account for structural data limitations:
-    1. **Data Scope Constraints:** The current structural feature vector is limited to baseline indicators (`budget`, `popularity`, `runtime`, `vote_average`)[cite: 5]. It lacks descriptive metadata such as director prestige indexes, star-power ranking components, or competitive weekend scheduling matrices.
+    1. **Data Scope Constraints:** The current structural feature vector is limited to baseline indicators (`budget`, `popularity`, `runtime`, `vote_average`). It lacks descriptive metadata such as director prestige indexes, star-power ranking components, or competitive weekend scheduling matrices.
     2. **Future Enhancements:** Given additional cycle iterations, integrating a Text Processing Natural Language Engine (NLP) to parse and evaluate textual script loglines or screenplay pitches would drastically improve early-stage modeling reliability before any budget capital is allocated.
     """)
